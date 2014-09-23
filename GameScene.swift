@@ -14,7 +14,9 @@ class GameScene: SKScene {
     var boardPosition:CGPoint = CGPointMake(0,0);
     var boardSize:CGSize = CGSize(width: 0,height: 0);
     var backgroundBoard = SKSpriteNode();
-
+    var redControl = SKSpriteNode();
+    var blueControl = SKSpriteNode();
+    var whiteBall = SKSpriteNode();
 
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
@@ -22,7 +24,7 @@ class GameScene: SKScene {
         skyColor = SKColor(red: 81.0/255.0, green: 192.0/255.0, blue: 201.0/255.0, alpha: 1.0);
         self.backgroundColor = skyColor;
 
-        //添加背景图片，草地，小河，山
+        //添加背景场地
         var bgTexture = SKTexture(imageNamed: "background");
         
         //设置大小和位置
@@ -40,23 +42,33 @@ class GameScene: SKScene {
         backgroundBoard.zPosition = 1;
         boardPosition = backgroundBoard.position
         self.addChild(backgroundBoard)
+        //添加物理边界
+        addEdgePhysics();
+        
+        //添加控制球擦
+        var redTexture = SKTexture(imageNamed: "red");
+        redControl = SKSpriteNode(texture:redTexture);
+        redControl.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
+        redControl.physicsBody = SKPhysicsBody.bodyWithCircleOfRadius(redControl.size.width/2);
+        redControl.physicsBody.dynamic = ture;
+        redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/2)
+        self.addChild(redControl)
 
-        var leftDoorx = boardPosition.x - boardSize.width*PBHalfDoor/PBBoardWidth;
-        var leftEdgex = boardPosition.x - boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
-        var rightDoorx = boardPosition.x + boardSize.width*PBHalfDoor/PBBoardWidth;
-        var rightEdgex = boardPosition.x + boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
-        var bottomy = boardPosition.y - boardSize.height*PBHalfHeight/PBBoardHeight;
-        var topy = boardPosition.y + boardSize.height*PBHalfHeight/PBBoardHeight;
+        var blueTexture = SKTexture(imageNamed: "blue");
+        blueControl = SKSpriteNode(texture:blueTexture);
+        blueControl.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
+        blueControl.physicsBody = SKPhysicsBody.bodyWithCircleOfRadius(blueControl.size.width/2);
+        blueControl.physicsBody.dynamic = ture;
+        blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/2)
+        self.addChild(blueControl)
 
-        var left1 = CGPointMake( leftDoorx,bottomy );
-        var left2 = CGPointMake(leftEdgex,bottomy);
-        var left3 = CGPointMake(leftEdgex,topy);
-        var left4 = CGPointMake(leftDoorx,topy);
-
-        var right1 = CGPointMake( rightDoorx,bottomy );
-        var right2 = CGPointMake(rightEdgex,bottomy);
-        var right3 = CGPointMake(rightEdgex,topy);
-        var right4 = CGPointMake(rightDoorx,topy);
+        var ballTexture = SKTexture(imageNamed: "ball");
+        whiteBall = SKSpriteNode(texture:ballTexture);
+        whiteBall.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
+        whiteBall.physicsBody = SKPhysicsBody.bodyWithCircleOfRadius(whiteBall.size.width/2);
+        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y)
+        whiteBall.physicsBody.dynamic = ture;
+        self.addChild(whiteBall)
     }
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
@@ -81,5 +93,37 @@ class GameScene: SKScene {
    
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
+    }
+
+    //内部自定义函数
+    func addEdgePhysics(){
+        var leftDoorx = boardPosition.x - boardSize.width*PBHalfDoor/PBBoardWidth;
+        var leftEdgex = boardPosition.x - boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
+        var rightDoorx = boardPosition.x + boardSize.width*PBHalfDoor/PBBoardWidth;
+        var rightEdgex = boardPosition.x + boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
+        var bottomy = boardPosition.y - boardSize.height*PBHalfHeight/PBBoardHeight;
+        var topy = boardPosition.y + boardSize.height*PBHalfHeight/PBBoardHeight;
+
+        var left1 = CGPointMake( leftDoorx,bottomy );
+        var left2 = CGPointMake(leftEdgex,bottomy);
+        var left3 = CGPointMake(leftEdgex,topy);
+        var left4 = CGPointMake(leftDoorx,topy);
+        var edgePath =CGPathCreateMutable();  
+        CGPathMoveToPoint(edgePath, NULL, left1.x, left1.y);
+        CGPathAddLineToPoint(edgePath,NULL,left2.x,left2.y);
+        CGPathAddLineToPoint(edgePath,NULL,left3.x,left3.y);
+        CGPathAddLineToPoint(edgePath,NULL,left4.x,left4.y);
+
+        var right1 = CGPointMake( rightDoorx,bottomy );
+        var right2 = CGPointMake(rightEdgex,bottomy);
+        var right3 = CGPointMake(rightEdgex,topy);
+        var right4 = CGPointMake(rightDoorx,topy);
+        var rightPath =CGPathCreateMutable();  
+        CGPathMoveToPoint(edgePath, NULL, right1.x, right1.y);
+        CGPathAddLineToPoint(edgePath,NULL,right2.x,right2.y);
+        CGPathAddLineToPoint(edgePath,NULL,right3.x,right3.y);
+        CGPathAddLineToPoint(edgePath,NULL,right4.x,right4.y);
+
+        backgroundBoard.physicsBody = SKPhysicsBody.bodyWithEdgeChainFromPath(edgePath);
     }
 }
