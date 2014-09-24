@@ -19,6 +19,7 @@ class GameScene: SKScene {
     var whiteBall = SKSpriteNode();
 
     var lastPosition:CGPoint = CGPointMake(0,0);
+    var lastTime:CGFloat = 0.0;
     var selectedNode:SKNode?;
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
@@ -78,7 +79,7 @@ class GameScene: SKScene {
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
         /* Called when a touch begins */
-        
+        //记录时间
         for touch: AnyObject in touches {
             lastPosition = touch.locationInNode(self)
             selectedNode = self.nodeAtPoint(lastPosition);
