@@ -10,16 +10,26 @@ import SpriteKit
 
 class GameScene: SKScene {
 
-
+    //场景使用的数据
+    //场地中心位置
     var boardPosition:CGPoint = CGPointMake(0,0);
+    //场地大小
     var boardSize:CGSize = CGSize(width: 0,height: 0);
+    //球门位置
+    var topy:CGFloat = 0.0;
+    var bottomy:CGFloat = 0.0;
+    var leftDoorx:CGFloat = 0.0;
+    var rightDoorx:CGFloat = 0.0;
+    //
+    //各节点实体
     var backgroundBoard = SKSpriteNode();
     var redControl = SKSpriteNode();
     var blueControl = SKSpriteNode();
     var whiteBall = SKSpriteNode();
 
-    var lastPosition:CGPoint = CGPointMake(0,0);
-    var lastTime:CGFloat = 0.0;
+    var lastPosition:CGPoint?;
+    var currentPosition:CGFloat?;
+    var lastUpdateTime:CGFloat?;
     var selectedNode:SKNode?;
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
@@ -48,41 +58,18 @@ class GameScene: SKScene {
         //添加物理边界
         addEdgePhysics();
         
-        //添加控制球擦
-        var redTexture = SKTexture(imageNamed: "red");
-        redControl = SKSpriteNode(texture:redTexture);
-        redControl.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
-        redControl.physicsBody = SKPhysicsBody(circleOfRadius:redControl.size.width/2);
-        redControl.physicsBody!.dynamic = true;
-        redControl.physicsBody!.affectedByGravity = false
-        redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/4)
-        self.addChild(redControl)
-
-        var blueTexture = SKTexture(imageNamed: "blue");
-        blueControl = SKSpriteNode(texture:blueTexture);
-        blueControl.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
-        blueControl.physicsBody = SKPhysicsBody(circleOfRadius:blueControl.size.width/2);
-        blueControl.physicsBody!.dynamic = true;
-        blueControl.physicsBody!.affectedByGravity = false
-        blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
-        self.addChild(blueControl)
-
-        var ballTexture = SKTexture(imageNamed: "ball");
-        whiteBall = SKSpriteNode(texture:ballTexture);
-        whiteBall.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
-        whiteBall.physicsBody = SKPhysicsBody(circleOfRadius:whiteBall.size.width/2);
-        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y)
-        whiteBall.physicsBody!.dynamic = true;
-        whiteBall.physicsBody!.affectedByGravity = false
-        self.addChild(whiteBall)
+        //添加物理实体
+        addVolumePhysics();
     }
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
         /* Called when a touch begins */
-        //记录时间
+
         for touch: AnyObject in touches {
-            lastPosition = touch.locationInNode(self)
-            selectedNode = self.nodeAtPoint(lastPosition);
+            if(touch == redControl){
+                lastPosition = touch.locationInNode(self)
+                selectedNode = redControl;
+            }
         }
     }
     override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
@@ -91,33 +78,72 @@ class GameScene: SKScene {
         for touch: AnyObject in touches {
             var location = touch.locationInNode(self)
             if(selectedNode != nil){
-                var action = SKAction();
-                action = SKAction.moveTo(location,duration:0.01);
-                if(selectedNode === redControl){
-                    redControl.runAction(action);
-                }
+                currentPosition = location;
+//                 var action = SKAction();
+//                 action = SKAction.moveTo(location,duration:0.01);
+//                 if(selectedNode === redControl){
+//                     redControl.runAction(action);
+//                 }
             }
-            lastPosition = location;
         }
     }
     override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
         /* Called when a touch begins */
         
         selectedNode = nil;
+        lastPosition = nil;
+        currentPosition = nil;
     }
     
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
+        if(lastUpdateTime == nil){
+            lastUpdateTime = currentTime;
+            
+        }else{
+            if(selectedNode != nil && lastPosition != nil && currentPosition != nil)
+            {
+                
+                selectedNode.postion = currentPosition;
+                lastPosition = currentPosition;
+            }
+        }
+        if(whiteBall.position.y > topy){
+            gameAlert("游戏胜利，是否重新开始？");
+        }else if(whiteBall.position.y < bottomy){
+            gameAlert("游戏失败，是否重新开始？");
+        }
     }
-
+    
     //内部自定义函数
+    func gameAlert(info:String){
+        let tit = NSLocalizedString("提示", comment: "")
+        let msg = NSLocalizedString(info, comment: "")
+        var alert:UIAlertView = UIAlertView()
+        alert.title = tit
+        alert.message = msg
+        alert.delegate = self
+        alert.addButtonWithTitle("OK")
+        alert.addButtonWithTitle("Cancel")
+        alert.show()
+    }
+    func alertView(alertView: UIAlertView!, clickedButtonAtIndex buttonIndex: Int){
+        if(buttonIndex == 0){
+            self.restart()
+        }
+    }
+    func restart(){
+        redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/4);
+        blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
+        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y)
+   }
     func addEdgePhysics(){
-        var leftDoorx = boardPosition.x - boardSize.width*PBHalfDoor/PBBoardWidth;
+        leftDoorx = boardPosition.x - boardSize.width*PBHalfDoor/PBBoardWidth;
         var leftEdgex = boardPosition.x - boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
-        var rightDoorx = boardPosition.x + boardSize.width*PBHalfDoor/PBBoardWidth;
+        rightDoorx = boardPosition.x + boardSize.width*PBHalfDoor/PBBoardWidth;
         var rightEdgex = boardPosition.x + boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
-        var bottomy = boardPosition.y - boardSize.height*PBHalfHeight/PBBoardHeight;
-        var topy = boardPosition.y + boardSize.height*PBHalfHeight/PBBoardHeight;
+        bottomy = boardPosition.y - boardSize.height*PBHalfHeight/PBBoardHeight;
+        topy = boardPosition.y + boardSize.height*PBHalfHeight/PBBoardHeight;
 
         var left1 = CGPointMake( leftDoorx,bottomy );
         var left2 = CGPointMake(leftEdgex,bottomy);
@@ -139,6 +165,60 @@ class GameScene: SKScene {
         CGPathAddLineToPoint(edgePath,nil,right3.x,right3.y);
         CGPathAddLineToPoint(edgePath,nil,right4.x,right4.y);
 
-        backgroundBoard.physicsBody = SKPhysicsBody(edgeChainFromPath:edgePath);
+        self.physicsBody = SKPhysicsBody(edgeChainFromPath:edgePath);
+        self.physicsBody.categoryBitMask = edgeCategory;
+        self.physicsBody.collisionBitMask = 0;
+        self.physicsBody.contactTestBitMask = 0;
+        self.physicsWorld.gravity = CGVectorMake(0,0);
+        self.physicsWorld.contactDelegate = self;
+        var centerLine = SKShapeNode();
+        var centerPath = CGPathCreateMutable();
+        CGPathMoveToPoint(centerPath, nil, leftEdgex, boardPosition.y);
+        CGPathAddLineToPoint(centerPath,nil,rightEdgex, boardPosition.y);
+        centerLine.path = centerPath;
+        centerLine.strokeColor = SKColor.clearColor;
+        centerLine.physicsBody = SKPhysicsBody(edgeChainFromPath:centerPath);
+        centerLine.physicsBody.categoryBitMask = centerCategory;
+        centerLine.physicsBody.collisionBitMask = ;
+        centerLine.physicsBody.contactTestBitMask = 0;
+        self.addChild(centerLine);
+    }
+    func addVolumePhysics(){
+        var redTexture = SKTexture(imageNamed: "red");
+        redControl = SKSpriteNode(texture:redTexture);
+        redControl.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
+        redControl.physicsBody = SKPhysicsBody(circleOfRadius:redControl.size.width/2);
+        redControl.physicsBody!.dynamic = true;
+        redControl.physicsBody!.affectedByGravity = false;
+        redControl.physicsBody.categoryBitMask = redPlayerCategory;
+        redControl.physicsBody.collisionBitMask = ballCategory|centerCategory|edgeCategory;
+        redControl.physicsBody.contactTestBitMask = 0;
+        redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/4);
+
+        self.addChild(redControl)
+
+        var blueTexture = SKTexture(imageNamed: "blue");
+        blueControl = SKSpriteNode(texture:blueTexture);
+        blueControl.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
+        blueControl.physicsBody = SKPhysicsBody(circleOfRadius:blueControl.size.width/2);
+        blueControl.physicsBody!.dynamic = true;
+        blueControl.physicsBody!.affectedByGravity = false;
+        blueControl.physicsBody.categoryBitMask = bluePlayerCategory;
+        blueControl.physicsBody.collisionBitMask = ballCategory|centerCategory|edgeCategory;
+        blueControl.physicsBody.contactTestBitMask = 0;
+        blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
+        self.addChild(blueControl)
+
+        var ballTexture = SKTexture(imageNamed: "ball");
+        whiteBall = SKSpriteNode(texture:ballTexture);
+        whiteBall.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
+        whiteBall.physicsBody = SKPhysicsBody(circleOfRadius:whiteBall.size.width/2);
+        whiteBall.physicsBody!.dynamic = true;
+        whiteBall.physicsBody!.affectedByGravity = false;
+        whiteBall.physicsBody.categoryBitMask = ballCategory;
+        whiteBall.physicsBody.collisionBitMask = edgeCategory|bluePlayerCategory|redPlayerCategory;
+        whiteBall.physicsBody.contactTestBitMask = 0;
+        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y)
+        self.addChild(whiteBall)
     }
 }

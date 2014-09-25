@@ -16,3 +16,10 @@ let PBedgeSize:CGFloat = 9;//场地边界宽度
 let PBHalfWidth:CGFloat = 92;//除球门外半边宽度
 let PBHalfHeight:CGFloat = 231;//场地高度的一半
 let PBHalfDoor:CGFloat = 41;
+
+//检测MASK
+let ballCategory:Int32 = 0x01;
+let redPlayerCategory:Int32 = 0x02;
+let bluePlayerCategory:Int32 = 0x04;
+let centerCategory:Int32 = 0x08;
+let edgeCategory = 0x10;
