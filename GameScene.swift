@@ -8,7 +8,7 @@
 
 import SpriteKit
 
-class GameScene: SKScene {
+class GameScene: SKScene,SKPhysicsContactDelegate {
 
     //场景使用的数据
     //场地中心位置
@@ -28,9 +28,11 @@ class GameScene: SKScene {
     var whiteBall = SKSpriteNode();
 
     var lastPosition:CGPoint?;
-    var currentPosition:CGFloat?;
-    var lastUpdateTime:CGFloat?;
+    var currentPosition:CGPoint?;
+    var lastUpdateTime:CFTimeInterval?;
     var selectedNode:SKNode?;
+    
+    var gameOver:Bool = false;
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
         var skyColor = SKColor();
@@ -66,8 +68,9 @@ class GameScene: SKScene {
         /* Called when a touch begins */
 
         for touch: AnyObject in touches {
-            if(touch == redControl){
-                lastPosition = touch.locationInNode(self)
+            lastPosition = touch.locationInNode(self)
+            let node = self.nodeAtPoint(lastPosition!)
+            if node === redControl {
                 selectedNode = redControl;
             }
         }
@@ -78,6 +81,9 @@ class GameScene: SKScene {
         for touch: AnyObject in touches {
             var location = touch.locationInNode(self)
             if(selectedNode != nil){
+                if(location.y > boardPosition.y){
+                    location.y = boardPosition.y - 1;
+                }
                 currentPosition = location;
 //                 var action = SKAction();
 //                 action = SKAction.moveTo(location,duration:0.01);
@@ -104,13 +110,15 @@ class GameScene: SKScene {
             if(selectedNode != nil && lastPosition != nil && currentPosition != nil)
             {
                 
-                selectedNode.postion = currentPosition;
+                selectedNode!.position = currentPosition!;
                 lastPosition = currentPosition;
             }
         }
-        if(whiteBall.position.y > topy){
+        if(whiteBall.position.y > topy && !gameOver){
+            gameOver = true;
             gameAlert("游戏胜利，是否重新开始？");
-        }else if(whiteBall.position.y < bottomy){
+        }else if(whiteBall.position.y < bottomy && !gameOver){
+            gameOver = true;
             gameAlert("游戏失败，是否重新开始？");
         }
     }
@@ -133,6 +141,7 @@ class GameScene: SKScene {
         }
     }
     func restart(){
+        gameOver = false;
         redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/4);
         blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
         whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y)
@@ -166,9 +175,9 @@ class GameScene: SKScene {
         CGPathAddLineToPoint(edgePath,nil,right4.x,right4.y);
 
         self.physicsBody = SKPhysicsBody(edgeChainFromPath:edgePath);
-        self.physicsBody.categoryBitMask = edgeCategory;
-        self.physicsBody.collisionBitMask = 0;
-        self.physicsBody.contactTestBitMask = 0;
+        self.physicsBody!.categoryBitMask = edgeCategory;
+        self.physicsBody!.collisionBitMask = 0;
+        self.physicsBody!.contactTestBitMask = 0;
         self.physicsWorld.gravity = CGVectorMake(0,0);
         self.physicsWorld.contactDelegate = self;
         var centerLine = SKShapeNode();
@@ -176,23 +185,24 @@ class GameScene: SKScene {
         CGPathMoveToPoint(centerPath, nil, leftEdgex, boardPosition.y);
         CGPathAddLineToPoint(centerPath,nil,rightEdgex, boardPosition.y);
         centerLine.path = centerPath;
-        centerLine.strokeColor = SKColor.clearColor;
+        centerLine.strokeColor = SKColor.clearColor();
         centerLine.physicsBody = SKPhysicsBody(edgeChainFromPath:centerPath);
-        centerLine.physicsBody.categoryBitMask = centerCategory;
-        centerLine.physicsBody.collisionBitMask = ;
-        centerLine.physicsBody.contactTestBitMask = 0;
+        centerLine.physicsBody!.categoryBitMask = centerCategory;
+        centerLine.physicsBody!.collisionBitMask = 0;
+        centerLine.physicsBody!.contactTestBitMask = 0;
         self.addChild(centerLine);
     }
     func addVolumePhysics(){
+        var screen = UIScreen.mainScreen()
         var redTexture = SKTexture(imageNamed: "red");
         redControl = SKSpriteNode(texture:redTexture);
         redControl.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
         redControl.physicsBody = SKPhysicsBody(circleOfRadius:redControl.size.width/2);
         redControl.physicsBody!.dynamic = true;
         redControl.physicsBody!.affectedByGravity = false;
-        redControl.physicsBody.categoryBitMask = redPlayerCategory;
-        redControl.physicsBody.collisionBitMask = ballCategory|centerCategory|edgeCategory;
-        redControl.physicsBody.contactTestBitMask = 0;
+        redControl.physicsBody!.categoryBitMask = redPlayerCategory;
+        redControl.physicsBody!.collisionBitMask = ballCategory|centerCategory|edgeCategory;
+        redControl.physicsBody!.contactTestBitMask = 0;
         redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/4);
 
         self.addChild(redControl)
@@ -203,9 +213,9 @@ class GameScene: SKScene {
         blueControl.physicsBody = SKPhysicsBody(circleOfRadius:blueControl.size.width/2);
         blueControl.physicsBody!.dynamic = true;
         blueControl.physicsBody!.affectedByGravity = false;
-        blueControl.physicsBody.categoryBitMask = bluePlayerCategory;
-        blueControl.physicsBody.collisionBitMask = ballCategory|centerCategory|edgeCategory;
-        blueControl.physicsBody.contactTestBitMask = 0;
+        blueControl.physicsBody!.categoryBitMask = bluePlayerCategory;
+        blueControl.physicsBody!.collisionBitMask = ballCategory|centerCategory|edgeCategory;
+        blueControl.physicsBody!.contactTestBitMask = 0;
         blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
         self.addChild(blueControl)
 
@@ -215,10 +225,10 @@ class GameScene: SKScene {
         whiteBall.physicsBody = SKPhysicsBody(circleOfRadius:whiteBall.size.width/2);
         whiteBall.physicsBody!.dynamic = true;
         whiteBall.physicsBody!.affectedByGravity = false;
-        whiteBall.physicsBody.categoryBitMask = ballCategory;
-        whiteBall.physicsBody.collisionBitMask = edgeCategory|bluePlayerCategory|redPlayerCategory;
-        whiteBall.physicsBody.contactTestBitMask = 0;
-        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y)
+        whiteBall.physicsBody!.categoryBitMask = ballCategory;
+        whiteBall.physicsBody!.collisionBitMask = edgeCategory|bluePlayerCategory|redPlayerCategory;
+        whiteBall.physicsBody!.contactTestBitMask = 0;
+        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y-200)
         self.addChild(whiteBall)
     }
 }

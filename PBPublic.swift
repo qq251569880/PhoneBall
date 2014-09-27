@@ -18,8 +18,8 @@ let PBHalfHeight:CGFloat = 231;//场地高度的一半
 let PBHalfDoor:CGFloat = 41;
 
 //检测MASK
-let ballCategory:Int32 = 0x01;
-let redPlayerCategory:Int32 = 0x02;
-let bluePlayerCategory:Int32 = 0x04;
-let centerCategory:Int32 = 0x08;
-let edgeCategory = 0x10;
+let ballCategory:UInt32 = 0x01;
+let redPlayerCategory:UInt32 = 0x02;
+let bluePlayerCategory:UInt32 = 0x04;
+let centerCategory:UInt32 = 0x08;
+let edgeCategory:UInt32 = 0x10;
