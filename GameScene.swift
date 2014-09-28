@@ -87,6 +87,9 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
                 if(location.y > boardPosition.y){
                     location.y = boardPosition.y - 1;
                 }
+                if(location.y < bottomy){
+                    location.y = bottomy + 1;
+                }
                 if(location.x < leftEdgex){
                     location.x = leftEdgex+1;
                 }
@@ -156,6 +159,11 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y)
    }
     func addEdgePhysics(){
+        
+        self.physicsWorld.gravity = CGVectorMake(0,0);
+        self.physicsWorld.contactDelegate = self;
+
+        
         leftDoorx = boardPosition.x - boardSize.width*PBHalfDoor/PBBoardWidth;
         leftEdgex = boardPosition.x - boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
         rightDoorx = boardPosition.x + boardSize.width*PBHalfDoor/PBBoardWidth;
@@ -167,28 +175,40 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         var left2 = CGPointMake(leftEdgex,bottomy);
         var left3 = CGPointMake(leftEdgex,topy);
         var left4 = CGPointMake(leftDoorx,topy);
-        var edgePath = CGPathCreateMutable();
-        CGPathMoveToPoint(edgePath, nil, left1.x, left1.y);
-        CGPathAddLineToPoint(edgePath,nil,left2.x,left2.y);
-        CGPathAddLineToPoint(edgePath,nil,left3.x,left3.y);
-        CGPathAddLineToPoint(edgePath,nil,left4.x,left4.y);
+        var leftPath = CGPathCreateMutable();
+        CGPathMoveToPoint(leftPath, nil, left1.x, left1.y);
+        CGPathAddLineToPoint(leftPath,nil,left2.x,left2.y);
+        CGPathAddLineToPoint(leftPath,nil,left3.x,left3.y);
+        CGPathAddLineToPoint(leftPath,nil,left4.x,left4.y);
+        
+        var leftLine = SKShapeNode();
+        leftLine.path = leftPath;
+        leftLine.strokeColor = SKColor.clearColor();
+        leftLine.physicsBody = SKPhysicsBody(edgeChainFromPath:leftPath);
+        leftLine.physicsBody!.categoryBitMask = edgeCategory;
+        leftLine.physicsBody!.collisionBitMask = 0;
+        leftLine.physicsBody!.contactTestBitMask = 0;
+        self.addChild(leftLine);
 
         var right1 = CGPointMake( rightDoorx,bottomy );
         var right2 = CGPointMake(rightEdgex,bottomy);
         var right3 = CGPointMake(rightEdgex,topy);
         var right4 = CGPointMake(rightDoorx,topy);
         var rightPath = CGPathCreateMutable();
-        CGPathMoveToPoint(edgePath, nil, right1.x, right1.y);
-        CGPathAddLineToPoint(edgePath,nil,right2.x,right2.y);
-        CGPathAddLineToPoint(edgePath,nil,right3.x,right3.y);
-        CGPathAddLineToPoint(edgePath,nil,right4.x,right4.y);
+        CGPathMoveToPoint(rightPath, nil, right1.x, right1.y);
+        CGPathAddLineToPoint(rightPath,nil,right2.x,right2.y);
+        CGPathAddLineToPoint(rightPath,nil,right3.x,right3.y);
+        CGPathAddLineToPoint(rightPath,nil,right4.x,right4.y);
 
-        self.physicsBody = SKPhysicsBody(edgeChainFromPath:edgePath);
-        self.physicsBody!.categoryBitMask = edgeCategory;
-        self.physicsBody!.collisionBitMask = 0;
-        self.physicsBody!.contactTestBitMask = 0;
-        self.physicsWorld.gravity = CGVectorMake(0,0);
-        self.physicsWorld.contactDelegate = self;
+        var rightLine = SKShapeNode();
+        rightLine.path = rightPath;
+        rightLine.strokeColor = SKColor.clearColor();
+        rightLine.physicsBody = SKPhysicsBody(edgeChainFromPath:rightPath);
+        rightLine.physicsBody!.categoryBitMask = edgeCategory;
+        rightLine.physicsBody!.collisionBitMask = 0;
+        rightLine.physicsBody!.contactTestBitMask = 0;
+        self.addChild(rightLine);
+
         var centerLine = SKShapeNode();
         var centerPath = CGPathCreateMutable();
         CGPathMoveToPoint(centerPath, nil, leftEdgex, boardPosition.y);
@@ -213,6 +233,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         redControl.physicsBody!.collisionBitMask = ballCategory|centerCategory|edgeCategory;
         redControl.physicsBody!.contactTestBitMask = 0;
         redControl.physicsBody!.usesPreciseCollisionDetection = true;
+        redControl.physicsBody!.mass = 100;
         redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/4);
 
         self.addChild(redControl)
@@ -227,6 +248,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         blueControl.physicsBody!.collisionBitMask = ballCategory|centerCategory|edgeCategory;
         blueControl.physicsBody!.contactTestBitMask = 0;
         blueControl.physicsBody!.usesPreciseCollisionDetection = true;
+        blueControl.physicsBody!.mass = 100;
         blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
         self.addChild(blueControl)
 
@@ -240,6 +262,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         whiteBall.physicsBody!.collisionBitMask = edgeCategory|bluePlayerCategory|redPlayerCategory;
         whiteBall.physicsBody!.contactTestBitMask = 0;
         whiteBall.physicsBody!.usesPreciseCollisionDetection = true;
+        whiteBall.physicsBody!.mass = 20;
         whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y-200)
         self.addChild(whiteBall)
     }
