@@ -20,6 +20,9 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
     var bottomy:CGFloat = 0.0;
     var leftDoorx:CGFloat = 0.0;
     var rightDoorx:CGFloat = 0.0;
+    //左右边际
+    var leftEdgex:CGFloat = 0.0;
+    var rightEdgex:CGFloat = 0.0;
     //
     //各节点实体
     var backgroundBoard = SKSpriteNode();
@@ -83,6 +86,12 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
             if(selectedNode != nil){
                 if(location.y > boardPosition.y){
                     location.y = boardPosition.y - 1;
+                }
+                if(location.x < leftEdgex){
+                    location.x = leftEdgex+1;
+                }
+                if(location.x > rightEdgex){
+                    location.x = rightEdgex-1;
                 }
                 currentPosition = location;
 //                 var action = SKAction();
@@ -148,9 +157,9 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
    }
     func addEdgePhysics(){
         leftDoorx = boardPosition.x - boardSize.width*PBHalfDoor/PBBoardWidth;
-        var leftEdgex = boardPosition.x - boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
+        leftEdgex = boardPosition.x - boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
         rightDoorx = boardPosition.x + boardSize.width*PBHalfDoor/PBBoardWidth;
-        var rightEdgex = boardPosition.x + boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
+        rightEdgex = boardPosition.x + boardSize.width*(PBHalfDoor+PBHalfWidth)/PBBoardWidth;
         bottomy = boardPosition.y - boardSize.height*PBHalfHeight/PBBoardHeight;
         topy = boardPosition.y + boardSize.height*PBHalfHeight/PBBoardHeight;
 
@@ -203,6 +212,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         redControl.physicsBody!.categoryBitMask = redPlayerCategory;
         redControl.physicsBody!.collisionBitMask = ballCategory|centerCategory|edgeCategory;
         redControl.physicsBody!.contactTestBitMask = 0;
+        redControl.physicsBody!.usesPreciseCollisionDetection = true;
         redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/4);
 
         self.addChild(redControl)
@@ -216,6 +226,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         blueControl.physicsBody!.categoryBitMask = bluePlayerCategory;
         blueControl.physicsBody!.collisionBitMask = ballCategory|centerCategory|edgeCategory;
         blueControl.physicsBody!.contactTestBitMask = 0;
+        blueControl.physicsBody!.usesPreciseCollisionDetection = true;
         blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
         self.addChild(blueControl)
 
@@ -228,6 +239,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         whiteBall.physicsBody!.categoryBitMask = ballCategory;
         whiteBall.physicsBody!.collisionBitMask = edgeCategory|bluePlayerCategory|redPlayerCategory;
         whiteBall.physicsBody!.contactTestBitMask = 0;
+        whiteBall.physicsBody!.usesPreciseCollisionDetection = true;
         whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y-200)
         self.addChild(whiteBall)
     }
