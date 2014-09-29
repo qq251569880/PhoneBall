@@ -121,9 +121,19 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         }else{
             if(selectedNode != nil && lastPosition != nil && currentPosition != nil)
             {
-                
-                selectedNode!.position = currentPosition!;
+                var duration:CFTimeInterval = lastUpdateTime - currentTime;
+                var x = currentPosition.x - lastPosition.x;
+                var y = currentPosition.y - lastPisition.y;
+/*              var distance = x*x+y*y;
+                if(y < 0){
+                    direction = (-acos(x/distance) + 2*M_PI)%(2*M_PI)
+                }else{
+                    direction = (acos(x/distance) + 2*M_PI)%(2*M_PI)
+                }
+*/
+                selectedNode!.velocity = CGVectorMake(x,y)/duration;
                 lastPosition = currentPosition;
+                lastUpdateTime = currentTime;
             }
         }
         if(whiteBall.position.y > topy && !gameOver){
@@ -228,12 +238,12 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         redControl.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
         redControl.physicsBody = SKPhysicsBody(circleOfRadius:redControl.size.width/2);
         redControl.physicsBody!.dynamic = true;
-        redControl.physicsBody!.affectedByGravity = false;
+        //redControl.physicsBody!.affectedByGravity = false;
         redControl.physicsBody!.categoryBitMask = redPlayerCategory;
         redControl.physicsBody!.collisionBitMask = ballCategory|centerCategory|edgeCategory;
         redControl.physicsBody!.contactTestBitMask = 0;
         redControl.physicsBody!.usesPreciseCollisionDetection = true;
-        redControl.physicsBody!.mass = 100;
+        redControl.physicsBody!.density = 100;
         redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/4);
 
         self.addChild(redControl)
@@ -243,12 +253,12 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         blueControl.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
         blueControl.physicsBody = SKPhysicsBody(circleOfRadius:blueControl.size.width/2);
         blueControl.physicsBody!.dynamic = true;
-        blueControl.physicsBody!.affectedByGravity = false;
+        //blueControl.physicsBody!.affectedByGravity = false;
         blueControl.physicsBody!.categoryBitMask = bluePlayerCategory;
         blueControl.physicsBody!.collisionBitMask = ballCategory|centerCategory|edgeCategory;
         blueControl.physicsBody!.contactTestBitMask = 0;
         blueControl.physicsBody!.usesPreciseCollisionDetection = true;
-        blueControl.physicsBody!.mass = 100;
+        blueControl.physicsBody!.density = 100;
         blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
         self.addChild(blueControl)
 
@@ -257,13 +267,13 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         whiteBall.setScale(screen.bounds.size.width/backgroundBoard.size.width*0.5);
         whiteBall.physicsBody = SKPhysicsBody(circleOfRadius:whiteBall.size.width/2);
         whiteBall.physicsBody!.dynamic = true;
-        whiteBall.physicsBody!.affectedByGravity = false;
+        //whiteBall.physicsBody!.affectedByGravity = false;
         whiteBall.physicsBody!.categoryBitMask = ballCategory;
         whiteBall.physicsBody!.collisionBitMask = edgeCategory|bluePlayerCategory|redPlayerCategory;
         whiteBall.physicsBody!.contactTestBitMask = 0;
         whiteBall.physicsBody!.usesPreciseCollisionDetection = true;
-        whiteBall.physicsBody!.mass = 20;
-        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y-200)
+        whiteBall.physicsBody!.density = 100;
+        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y-200);
         self.addChild(whiteBall)
     }
 }
