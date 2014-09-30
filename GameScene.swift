@@ -121,9 +121,9 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         }else{
             if(selectedNode != nil && lastPosition != nil && currentPosition != nil)
             {
-                var duration:CFTimeInterval = lastUpdateTime - currentTime;
-                var x = currentPosition.x - lastPosition.x;
-                var y = currentPosition.y - lastPisition.y;
+                var duration:CFTimeInterval = lastUpdateTime! - currentTime;
+                var x = currentPosition!.x - lastPosition!.x;
+                var y = currentPosition!.y - lastPosition!.y;
 /*              var distance = x*x+y*y;
                 if(y < 0){
                     direction = (-acos(x/distance) + 2*M_PI)%(2*M_PI)
@@ -131,7 +131,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
                     direction = (acos(x/distance) + 2*M_PI)%(2*M_PI)
                 }
 */
-                selectedNode!.velocity = CGVectorMake(x,y)/duration;
+                selectedNode!.physicsBody!.velocity = CGVectorMake(x/CGFloat(duration),y/CGFloat(duration));
                 lastPosition = currentPosition;
                 lastUpdateTime = currentTime;
             }
