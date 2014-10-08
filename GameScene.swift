@@ -121,7 +121,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         }else{
             if(selectedNode != nil && lastPosition != nil && currentPosition != nil)
             {
-                var duration:CFTimeInterval = lastUpdateTime! - currentTime;
+                var duration:CFTimeInterval = currentTime - lastUpdateTime! ;
                 var x = currentPosition!.x - lastPosition!.x;
                 var y = currentPosition!.y - lastPosition!.y;
 /*              var distance = x*x+y*y;
