@@ -23,3 +23,9 @@ let redPlayerCategory:UInt32 = 0x02;
 let bluePlayerCategory:UInt32 = 0x04;
 let centerCategory:UInt32 = 0x08;
 let edgeCategory:UInt32 = 0x10;
+
+//玩家xy移动最大速度的75%作为电脑速度上限
+var xRobotSpeed:CGFloat = 0.0;
+var yRobotSpeed:CGFloat = 0.0;
+var robotInterval = 5;
+var roboTick = 0;

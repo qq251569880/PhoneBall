@@ -29,12 +29,17 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
     var redControl = SKSpriteNode();
     var blueControl = SKSpriteNode();
     var whiteBall = SKSpriteNode();
-
+    //玩家控制信息
     var lastPosition:CGPoint?;
     var currentPosition:CGPoint?;
     var lastUpdateTime:CFTimeInterval?;
     var selectedNode:SKNode?;
+    //电脑控制信息
+    var robotPosition:CGPoint = CGPointMake(0,0);
     
+    //球运动信息
+    var lastBallPosition:CGPoint?;
+
     var gameOver:Bool = false;
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
@@ -130,17 +135,37 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
                 }else{
                     direction = (acos(x/distance) + 2*M_PI)%(2*M_PI)
                 }
-*/
-                selectedNode!.physicsBody!.velocity = CGVectorMake(x/CGFloat(duration),y/CGFloat(duration));
+*/ 
+                var xSpeed = x/CGFloat(duration);
+                var ySpeed = y/CGFloat(duration);
+                selectedNode!.physicsBody!.velocity = CGVectorMake(xSpeed,ySpeed);
+                if(xRobotSpeed < (xSpeed * 0.75)){
+                    xRobotSpeed = xSpeed * 0.75;
+                }
+                if(yRobotSpeed < (ySpeed * 0.75)){
+                    yRobotSpeed = ySpeed * 0.75;
+                }
                 lastPosition = currentPosition;
                 lastUpdateTime = currentTime;
+            }
+            
+            //电脑智能运动，每n次点进行一次运算
+            if(robotTick == 0){
+                if(lastBallPosition == whiteBall.postion){
+                }
+            }
+            robotTick++;
+            if(robotTick == robotInterval){
+                robotTick = 0;
             }
         }
         if(whiteBall.position.y > topy && !gameOver){
             gameOver = true;
+            whiteBall.physicsBody!.velocity = 0;
             gameAlert("游戏胜利，是否重新开始？");
         }else if(whiteBall.position.y < bottomy && !gameOver){
             gameOver = true;
+            whiteBall.physicsBody!.velocity = 0;
             gameAlert("游戏失败，是否重新开始？");
         }
     }
@@ -165,8 +190,12 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
     func restart(){
         gameOver = false;
         redControl.position = CGPointMake( boardPosition.x,boardPosition.y - boardSize.height/4);
-        blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
-        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y)
+        blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4);
+        whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y);
+        lastPosition = redControl.position;
+        lastBallPosition = whiteBall.position;
+        robotPosition = blueControl.position;
+        selectedNode = nil;
    }
     func addEdgePhysics(){
         
@@ -259,7 +288,8 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         blueControl.physicsBody!.contactTestBitMask = 0;
         blueControl.physicsBody!.usesPreciseCollisionDetection = true;
         blueControl.physicsBody!.density = 100;
-        blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4)
+        blueControl.position = CGPointMake( boardPosition.x,boardPosition.y + boardSize.height/4);
+        robotPosition = blueControl.position;
         self.addChild(blueControl)
 
         var ballTexture = SKTexture(imageNamed: "ball");
@@ -274,6 +304,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         whiteBall.physicsBody!.usesPreciseCollisionDetection = true;
         whiteBall.physicsBody!.density = 100;
         whiteBall.position = CGPointMake( boardPosition.x,boardPosition.y-200);
-        self.addChild(whiteBall)
+        lastBallPosition = whiteBall.position;
+        self.addChild(whiteBall);
     }
 }
