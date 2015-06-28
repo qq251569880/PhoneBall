@@ -151,7 +151,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
             
             //电脑智能运动，每n次点进行一次运算
             if(robotTick == 0){
-                if(lastBallPosition == whiteBall.postion){
+                if(lastBallPosition == whiteBall.position){
                 }
             }
             robotTick++;
@@ -161,11 +161,11 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         }
         if(whiteBall.position.y > topy && !gameOver){
             gameOver = true;
-            whiteBall.physicsBody!.velocity = 0;
+            whiteBall.physicsBody!.velocity = CGVectorMake(0,0);
             gameAlert("游戏胜利，是否重新开始？");
         }else if(whiteBall.position.y < bottomy && !gameOver){
             gameOver = true;
-            whiteBall.physicsBody!.velocity = 0;
+            whiteBall.physicsBody!.velocity = CGVectorMake(0,0);
             gameAlert("游戏失败，是否重新开始？");
         }
     }

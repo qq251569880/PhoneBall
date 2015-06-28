@@ -28,4 +28,4 @@ let edgeCategory:UInt32 = 0x10;
 var xRobotSpeed:CGFloat = 0.0;
 var yRobotSpeed:CGFloat = 0.0;
 var robotInterval = 5;
-var roboTick = 0;
+var robotTick = 0;
